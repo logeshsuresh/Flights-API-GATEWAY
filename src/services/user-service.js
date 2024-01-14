@@ -1,16 +1,17 @@
 const {StatusCodes} = require('http-status-codes');
 
 const { UserRepository } = require('../repositories');
+const { Auth } = require('../utils/common');
 const AppError = require('../utils/errors/app-error');
 
 const userRepository = new UserRepository();
 
-async function createUser(data) {
+async function signup(data) {
     try {
         const user = await userRepository.create(data);
         return user;
     } catch(error) {
-        if(error.name == 'SequelizeValidationError' || error.name == 'SequelizeUniqueConstraintError') {
+        if (error.name == 'SequelizeValidationError' || error.name == 'SequelizeUniqueConstraintError') {
             let explanation = [];
             error.errors.forEach((err) => {
                 explanation.push(err.message);
@@ -21,6 +22,29 @@ async function createUser(data) {
     }
 }
 
+async function signin(data) {
+    try {
+        const user = await userRepository.getUserByEmail(data.email);
+        if (!user) {
+            throw new AppError('No user found for the given email', StatusCodes.NOT_FOUND);
+        }
+        const passwordMatch = Auth.checkPassword(data.password, user.password);
+        if (!passwordMatch) {
+            throw new AppError('Password does not match', StatusCodes.BAD_REQUEST);
+        }
+        // if password matched, create JSON Web Token
+        const jwt  = Auth.createToken({id: user.id, email: user.email});
+        return jwt;
+    } catch (error) {
+        if (error instanceof AppError) throw error;
+        console.log(error);
+        throw new AppError('Something went wrong', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+
+
 module.exports = {
-    createUser
+    signup,
+    signin
 }
