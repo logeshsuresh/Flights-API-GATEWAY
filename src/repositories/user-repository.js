@@ -13,9 +13,6 @@ class UserRepository extends CrudRepository {
                 email: email
             }
         });
-        if (!response) {
-            throw new AppError('Not able to find the resource', StatusCodes.NOT_FOUND);
-        }
         return response;
     }
 }

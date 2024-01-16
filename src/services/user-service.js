@@ -65,13 +65,47 @@ async function isAuthenticated(token) {
         if (error.name === 'TokenExpiredError') {
             throw new AppError('JWT token expired', StatusCodes.BAD_REQUEST);
         }
-        console.log(error);
         throw error;
+    }
+}
+
+async function addRoleToUser(data) {
+    try {
+        const user = await userRepository.get(data.id);
+        if (!user) {
+            throw new AppError('No user found with the given ID', StatusCodes.NOT_FOUND);
+        }
+        const role = await roleRepository.getRoleByName(data.role);
+        if (!role) {
+            throw new AppError('No role found with the given role name', StatusCodes.NOT_FOUND);
+        }
+        user.addRole(role);
+        return user;
+    } catch (error) {
+        throw new AppError('Something went wrong', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+async function isAdmin(id) {
+    try {
+        const user = await userRepository.get(id);
+        if (!user) {
+            throw new AppError('No user found with the given id', StatusCodes.NOT_FOUND);
+        }
+        const adminRole = await roleRepository.getRoleByName(Enums.USER_ROLES_ENUMS.ADMIN);
+        if (!adminRole) {
+            throw new AppError('No role found with the given name', StatusCodes.NOT_FOUND);
+        }
+        return user.hasRole(adminRole);
+    } catch (error) {
+        throw new AppError('Something went wrong', StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
 module.exports = {
     signup,
     signin,
-    isAuthenticated
+    isAuthenticated,
+    addRoleToUser,
+    isAdmin
 }
