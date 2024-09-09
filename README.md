@@ -8,6 +8,9 @@ This project implements an API Gateway for Namaste Airlines. It includes feature
 - Rate Limiter: Protects the API from being overwhelmed by limiting the number of requests from a single source.
 - Proxy Functionality: Forwards requests to appropriate backend services.
 
+## High Level Design
+![High Level Design](https://github.com/logeshsuresh/Flights-API-GATEWAY/blob/master/Flights-HLD.png)
+
 ## Setup
 Follow these steps to set up the project locally:
 
